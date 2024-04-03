@@ -8,6 +8,31 @@ using { /UnrealEngine.com/Temporary/Diagnostics }
 using { /UnrealEngine.com/Temporary/UI }
 using { /UnrealEngine.com/Temporary/SpatialMath }
 
+#NumberImage := enum:
+#    Zero
+#    One
+#    Two
+#    Three
+#    Four
+#    Five
+#    Six
+#    Seven
+#    Eight
+#    Nine
+#    
+#(Wrapper: NumberImage).GetImage():texture=
+#    case(Wrapper):
+#        NumberImage.Zero => Images.Zero
+#        NumberImage.One => Images.One
+#        NumberImage.Two => Images.Two
+#        NumberImage.Three => Images.Three
+#        NumberImage.Four => Images.Four
+#        NumberImage.Five => Images.Five
+#        NumberImage.Six => Images.Six
+#        NumberImage.Seven => Images.Seven
+#        NumberImage.Eight => Images.Eight
+#        NumberImage.Nine => Images.Nine
+
 GetNumberImage(Number : int):texture=
     if (Number = 0){ return Images.Zero }
     else if (Number = 1){ return Images.One }
@@ -27,6 +52,9 @@ number_block := class(creative_device):
     Size<public> : float = 20.0
     var Numbers<private> : []texture_block = array{}
 
+    GetTextureBlockArray():[]texture_block=
+        return Numbers
+
     SetNumber():void=
         var NumbersList : []int = SplitNumber(Number)
         if (NumbersList.Length = 0 and Number = 0):
@@ -38,6 +66,7 @@ number_block := class(creative_device):
                 Image.SetImage(GetNumberImage(NumI))
                 Image.SetVisibility(widget_visibility.Visible)
             set Index -= 1
+        #set Number = Num
 
     RenderNumberImages():[]stack_box_slot=
         var StackBoxSlots : []stack_box_slot = array{}
