@@ -8,31 +8,6 @@ using { /UnrealEngine.com/Temporary/Diagnostics }
 using { /UnrealEngine.com/Temporary/UI }
 using { /UnrealEngine.com/Temporary/SpatialMath }
 
-#NumberImage := enum:
-#    Zero
-#    One
-#    Two
-#    Three
-#    Four
-#    Five
-#    Six
-#    Seven
-#    Eight
-#    Nine
-#    
-#(Wrapper: NumberImage).GetImage():texture=
-#    case(Wrapper):
-#        NumberImage.Zero => Images.Zero
-#        NumberImage.One => Images.One
-#        NumberImage.Two => Images.Two
-#        NumberImage.Three => Images.Three
-#        NumberImage.Four => Images.Four
-#        NumberImage.Five => Images.Five
-#        NumberImage.Six => Images.Six
-#        NumberImage.Seven => Images.Seven
-#        NumberImage.Eight => Images.Eight
-#        NumberImage.Nine => Images.Nine
-
 GetNumberImage(Number : int):texture=
     if (Number = 0){ return Images.Zero }
     else if (Number = 1){ return Images.One }
@@ -46,27 +21,70 @@ GetNumberImage(Number : int):texture=
     else if (Number = 9){ return Images.Nine }
     return Images.Zero
 
+IsIntegerInArray(Integer : int, IntegerArray : []int):int=
+    for (I : IntegerArray):
+        if (Integer = I):
+            return 1
+    return 0
+
+SplitNumber(Number : int):[]int=
+    <#
+        Splits a number up into an array
+        Example
+        5432 -> {5,4,3,2}
+    #>
+
+    var Numbers : []int = array{}
+    var Num : int = Number
+
+    loop: 
+        if (not Num > 0){ return Numbers }
+        digit := Modulo(Num, 10)
+        set Numbers += array{ digit }
+        if (Value : int = Floor(Num / 10)):
+            set Num = Value
+       # set Num = Floor(Num / 10)
+
 number_block := class(creative_device):
     var Number<public> : int = 0
-    RenderLength<public> : int = 2
-    Size<public> : float = 20.0
+    var RenderLength<public> : int = 2
+    var Size<public> : float = 20.0
     var Numbers<private> : []texture_block = array{}
 
     GetTextureBlockArray():[]texture_block=
         return Numbers
 
+    SetImageArray(TextureArray : []texture_block):void=
+        set Numbers = TextureArray
+
     SetNumber():void=
         var NumbersList : []int = SplitNumber(Number)
         if (NumbersList.Length = 0 and Number = 0):
             set NumbersList += array{0}
-            
+
+        var IndexesBeingUsed : []int = array{}    
+        
+        # Set Images to correct number
         var Index : int = Numbers.Length - 1
         for (NumI : NumbersList):
             if (Image := Numbers[Index]):
                 Image.SetImage(GetNumberImage(NumI))
                 Image.SetVisibility(widget_visibility.Visible)
+                set IndexesBeingUsed += array{Index}
             set Index -= 1
-        #set Number = Num
+        
+        # Hide Unused Images
+        var ImageIndex : int = 0
+        for (Image : Numbers):
+            #BeingUsed : logic = IsIntegerInArray(ImageIndex, []IndexesBeingUsed)
+            #if (not BeingUsed):
+            var IsBeingUsed : int = IsIntegerInArray(ImageIndex, IndexesBeingUsed) # USING 0 and 1 for False, True because logic isnt working in if statements
+            
+            if (IsBeingUsed = 0):
+                #Print("Hidding Image {ImageIndex}")
+                Image.SetVisibility(widget_visibility.Hidden)
+
+            set ImageIndex += 1
 
     RenderNumberImages():[]stack_box_slot=
         var StackBoxSlots : []stack_box_slot = array{}
