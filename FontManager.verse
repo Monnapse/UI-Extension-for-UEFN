@@ -77,4 +77,4 @@ BrunoAceFontManager := class():
             "Z" => return BrunoAce.z_c
 
             # Else
-            _ => return Images.Blank
+            _ => return BrunoAce.Blank
