@@ -5,3 +5,4 @@
 
 # UI Elements List
 * Number Block (Like a text block but its only numbers and you can change the numbers during runtime/midgame)
+* Dynamic Text Block (Like a text block but you can change the text during runtime/midgame)

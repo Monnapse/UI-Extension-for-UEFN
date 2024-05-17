@@ -105,3 +105,80 @@ number_block := class(creative_device):
         return stack_box:
             Orientation := orientation.Horizontal 
             Slots := RenderNumberImages()
+
+Fonts := enum:
+    BrunoAce
+    
+dynamic_text_block := class():
+    # Public Variables
+    var Text <public> : string = ""
+    var CharacterLength<public> : int = 25
+    var Font<public> : Fonts = Fonts.BrunoAce
+    var FontSize<public> : float = 20.0
+    var Kerning<public> : float = 0.0
+
+    # Private Variables
+    var Characters<private> : []texture_block = array{}
+
+    GetTextureBlockArray():[]texture_block=
+        return Characters
+
+    SetImageArray(TextureArray : []texture_block):void=
+        set Characters = TextureArray
+
+    GetCharacterImageByFont(Character : string)<transacts>:texture=
+        if (Font = Fonts.BrunoAce):
+            BrunoAceFont := BrunoAceFontManager{}
+            #Print("{Character}")
+            return BrunoAceFont.Get(Character)
+        return Images.Blank
+
+    SetText(TextString : string):void=
+        var ActualText : string = TextString
+        var IndexesBeingUsed : []int = array{}  
+
+        if (ActualText = ""):
+            set ActualText = Text
+
+        for (I := 0..ActualText.Length):
+            if (Char := ActualText[I]):
+                if (Image := Characters[I]):
+                    Image.SetImage(GetCharacterImageByFont("{Char}"))
+                    Image.SetVisibility(widget_visibility.Visible)
+                    set IndexesBeingUsed += array{I}
+                    #Print("{Char}")
+
+        for (I := 0..Characters.Length):
+            var IsBeingUsed : int = IsIntegerInArray(I, IndexesBeingUsed) # USING 0 and 1 for False, True because logic isnt working in if statements
+            
+            if:
+                IsBeingUsed = 0
+                Image := Characters[I]
+            then:
+                Image.SetImage(Images.Blank)
+                Image.SetVisibility(widget_visibility.Hidden)
+             
+    RenderCharacterImages():[]stack_box_slot=
+        var StackBoxSlots : []stack_box_slot = array{}
+        for (I := 1..CharacterLength):
+            var Image : texture_block = texture_block:
+                DefaultImage := Images.Blank
+                DefaultDesiredSize := vector2{X := FontSize + Kerning, Y := FontSize}
+            Image.SetVisibility(widget_visibility.Hidden)
+
+            set Characters += array{Image}
+
+            set StackBoxSlots += array:
+                stack_box_slot:
+                    Widget := Image
+                    #Distribution := option{10.0}
+
+        SetText()
+        return StackBoxSlots
+
+    GetDynamicTextBlock():stack_box=
+        Slots := RenderCharacterImages()
+        #Print("{Characters.Length} Characters")
+        return stack_box:
+            Orientation := orientation.Horizontal 
+            Slots := Slots
